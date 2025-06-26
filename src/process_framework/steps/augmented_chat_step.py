@@ -1,0 +1,78 @@
+"""
+Augmented Chat Step - Generates final answer using context and chat history
+"""
+
+from datetime import datetime
+
+from pydantic import BaseModel, Field
+from rich import print
+from semantic_kernel import Kernel
+from semantic_kernel.connectors.ai.chat_completion_client_base import (
+    ChatCompletionClientBase,
+)
+from semantic_kernel.contents import ChatHistory
+from semantic_kernel.functions import kernel_function
+from semantic_kernel.processes.kernel_process import (
+    KernelProcessStep,
+    KernelProcessStepState,
+)
+
+from ..prompts.augmented_chat_prompt import AUGMENTED_CHAT_SYSTEM_PROMPT
+
+
+class AugmentedChatStepState(BaseModel):
+    chat_history: ChatHistory = Field(default_factory=ChatHistory)
+
+
+class AugmentedChatStep(KernelProcessStep[AugmentedChatStepState]):
+    """Process step to generate final answer using retrieved context"""
+
+    state: AugmentedChatStepState = Field(default_factory=AugmentedChatStepState)  # type: ignore
+
+    async def activate(self, state: KernelProcessStepState):
+        """Activate the step and ensure chat history is initialized"""
+        self.state = state.state  # type: ignore
+        if self.state.chat_history is None:
+            self.state.chat_history = ChatHistory(
+                system_message=AUGMENTED_CHAT_SYSTEM_PROMPT.format(
+                    date=datetime.today().strftime("%Y-%m-%d")
+                )
+            )
+
+    @kernel_function
+    async def generate_answer(
+        self,
+        data: dict[str, str],
+        kernel: Kernel,
+    ) -> str:
+        """Generate final answer using context and chat history"""
+
+        question = data.get("question")
+        context_str = data.get("context")
+
+        # TODO: Find a better way to simulate a function call in the chat history
+        # This https://learn.microsoft.com/en-us/semantic-kernel/concepts/ai-services/chat-completion/chat-history?pivots=programming-language-python fails because the model somehow ignores the function content
+        if context_str:
+            prompt = (
+                f"Please answer the following question based ONLY on the provided context.\n"
+                f"If the answer is not in the context, say 'I don't have enough information to answer that'.\n\n"
+                f"--- CONTEXT ---\n{context_str}\n\n"
+                f"--- QUESTION ---\n{question}"
+            )
+            self.state.chat_history.add_user_message(prompt)
+        else:
+            self.state.chat_history.add_user_message(question)
+
+        chat_service, settings = kernel.select_ai_service(type=ChatCompletionClientBase)
+        assert isinstance(chat_service, ChatCompletionClientBase)
+
+        response = await chat_service.get_chat_message_content(
+            chat_history=self.state.chat_history, settings=settings
+        )
+
+        final_answer = str(response).strip()
+        self.state.chat_history.add_assistant_message(final_answer)
+
+        print(f"[red]Generated final answer: {final_answer}\n[/red]")
+
+        return final_answer
