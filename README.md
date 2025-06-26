@@ -13,7 +13,7 @@ This repository demonstrates how to migrate a PromptFlow application to the Sema
 │   └── process_framework/        # New Semantic Kernel implementation
 │       ├── steps/                # Process steps
 │       ├── prompts/              # Prompt templates
-│       ├── utils/                # Utility functions (Wikipedia)
+│       ├── utils/                # Utility functions (Wikipedia, Observability)
 │       └── wiki_chat_process.py  # Main process implementation
 └── main.py                       # Demo application
 ```
@@ -68,6 +68,6 @@ graph TD
   - [x] Extracted prompts into parametrized templates
   - [x] Migrated utility functions
   - [x] Built event-driven process flow
-- [ ] Add tracing and observability
+- [x] Add tracing and observability
 - [ ] Create evaluation dataset and metrics
 - [ ] Add red teaming capabilities
