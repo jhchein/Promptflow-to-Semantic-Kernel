@@ -4,6 +4,7 @@ Chat with Wikipedia Process - Main implementation
 
 import asyncio
 import json
+import logging
 import os
 
 from dotenv import load_dotenv
@@ -19,10 +20,22 @@ from .steps.extract_query_step import ExtractQueryStep
 from .steps.get_wiki_url_step import GetWikiUrlStep
 from .steps.process_search_result_step import ProcessSearchResultStep
 from .steps.search_url_step import SearchUrlStep
+from .utils.observability_utils import (
+    set_up_logging,
+    set_up_metrics,
+    set_up_tracing,
+)
 
 if not load_dotenv(verbose=True):
     print("Failed to load environment variables")
     exit(1)
+
+# This must be done before any other telemetry calls
+set_up_logging()
+set_up_tracing()
+set_up_metrics()
+
+logger = logging.getLogger(__name__)
 
 
 class WikiChatProcess:

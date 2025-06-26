@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "azure-monitor-opentelemetry-exporter>=1.0.0b38",
     "beautifulsoup4>=4.13.4",
     "python-dotenv>=1.1.1",
     "requests>=2.32.4",
