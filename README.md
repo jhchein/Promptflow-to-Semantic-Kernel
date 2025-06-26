@@ -5,38 +5,60 @@ This repository demonstrates how to migrate a PromptFlow application to the Sema
 ## Project Structure
 
 ```text
-├── promptflow/                   # Original PromptFlow implementation
+├── promptflow/                   # Original PromptFlow implementation (Chat with Wikipedia)
 │   ├── flow.dag.yaml             # Original DAG definition
 │   ├── *.py                      # Original Python tools
 │   └── *.jinja2                  # Original prompt templates
 ├── src/
 │   └── process_framework/        # New Semantic Kernel implementation
-│       ├── steps/                # Process steps (migrated from DAG nodes)
-│       ├── prompts/              # Parametrized prompt templates
-│       ├── utils/                # Utility functions
+│       ├── steps/                # Process steps
+│       ├── prompts/              # Prompt templates
+│       ├── utils/                # Utility functions (Wikipedia)
 │       └── wiki_chat_process.py  # Main process implementation
 └── main.py                       # Demo application
+```
+
+## Running the Demo
+
+1.  **Set up environment variables**
+
+    Copy the sample `.env.sample` file to `.env` and update it with your Azure OpenAI credentials.
+
+    ```bash
+    cp .env.sample .env
+    ```
+
+2.  **Run the demo**
+
+    This project uses `uv` to manage dependencies and run the application. It will automatically create a virtual environment and install the required packages.
+
+    ```bash
+    uv run python main.py
+    ```
+
+## Process Flow
+
+```mermaid
+graph TD
+    A[Input: Question] -- question --> B(ExtractQueryStep);
+    B -- extracted_query --> C(GetWikiUrlStep);
+    C -- url_list --> D(SearchUrlStep);
+    D -- search_results --> E(ProcessSearchResultStep);
+    E -- context --> F(AugmentedChatStep);
+    F -- answer --> G[Output: Final Answer];
 ```
 
 ## Migration Overview
 
 ### Original PromptFlow Nodes → Process Steps
 
-| PromptFlow Node               | Process Step              | Description                            |
-| ----------------------------- | ------------------------- | -------------------------------------- |
-| `extract_query_from_question` | `ExtractQueryStep`        | LLM call to refine user query          |
-| `get_wiki_url`                | `GetWikiUrlStep`          | Python tool to find Wikipedia URLs     |
-| `search_result_from_url`      | `SearchUrlStep`           | Python tool to fetch content from URLs |
-| `process_search_result`       | `ProcessSearchResultStep` | Python tool to format search results   |
-| `augmented_chat`              | `AugmentedChatStep`       | LLM call to generate final answer      |
-
-### Key Changes
-
-1. **DAG Definition**: Moved from YAML to Python with `ProcessBuilder`
-2. **Node Logic**: Converted to `KernelProcessStep` classes with `@kernel_function` decorators
-3. **Event-Driven Flow**: Data flows through events between steps
-4. **Prompt Templates**: Separated into parametrized Python files for variant testing
-5. **Utilities**: Extracted reusable functions to utils modules
+| PromptFlow Node               | Process Step              | Description                                      |
+| ----------------------------- | ------------------------- | ------------------------------------------------ |
+| `extract_query_from_question` | `ExtractQueryStep`        | LLM call to refine user query **(stateful)**     |
+| `get_wiki_url`                | `GetWikiUrlStep`          | Python tool to find Wikipedia URLs               |
+| `search_result_from_url`      | `SearchUrlStep`           | Python tool to fetch content from URLs           |
+| `process_search_result`       | `ProcessSearchResultStep` | Python tool to format search results             |
+| `augmented_chat`              | `AugmentedChatStep`       | LLM call to generate final answer **(stateful)** |
 
 ## Migration Status
 
@@ -49,30 +71,3 @@ This repository demonstrates how to migrate a PromptFlow application to the Sema
 - [ ] Add tracing and observability
 - [ ] Create evaluation dataset and metrics
 - [ ] Add red teaming capabilities
-
-## Running the Demo
-
-```bash
-# Setup environment variables in .env
-# API_KEY=your_azure_openai_key
-# ENDPOINT=your_azure_openai_endpoint
-# DEPLOYMENT_NAME=your_model_deployment
-
-# Run the demo
-python main.py
-```
-
-## Key Benefits of Migration
-
-- **Better Integration**: Native integration with Semantic Kernel ecosystem
-- **Type Safety**: Better type checking and IDE support
-- **Modularity**: Easier to test and maintain individual steps
-- **Event-Driven**: More flexible flow control with events
-- **Scalability**: Better support for complex workflows and cycles
-
-## Next Steps
-
-- Add tracing and observability
-- Implement evaluation metrics
-- Add error handling and retry logic
-- Create more sophisticated event handling
