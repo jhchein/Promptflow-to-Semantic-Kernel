@@ -79,3 +79,4 @@ graph TD
 - [x] Add tracing and observability
 - [ ] Create evaluation dataset and metrics
 - [ ] Add red teaming capabilities
+- [ ] Add a more complex SK Process Framework demo (leverage events, more complex flows, and agents with tools) ... e.g. https://github.com/jennifermarsman/MultiagentResearch
