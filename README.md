@@ -11,10 +11,10 @@ This repository demonstrates how to migrate a PromptFlow application to the Sema
 ├── .env.sample                   # Environment variable template
 ├── pyproject.toml                # Project dependencies
 └── src/
-    ├── promptflow/                   # Original PromptFlow implementation (Chat with Wikipedia)
-    │   ├── flow.dag.yaml             # Original DAG definition
-    │   ├── *.py                      # Original Python tools
-    │   └── *.jinja2                  # Original prompt templates
+    ├── promptflow/               # Original PromptFlow implementation (Chat with Wikipedia)
+    │   ├── flow.dag.yaml         # Original DAG definition
+    │   ├── *.py                  # Original Python tools
+    │   └── *.jinja2              # Original prompt templates
     ├── agent_service/            # Optional: Agent Service demo
     │   ├── agent_service.py      # Azure AI Agent demo
     │   ├── README.md
