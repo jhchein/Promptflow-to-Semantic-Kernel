@@ -5,17 +5,17 @@ This repository demonstrates how to migrate a PromptFlow application to the Sema
 ## Project Structure
 
 ```text
-├── promptflow/                   # Original PromptFlow implementation (Chat with Wikipedia)
-│   ├── flow.dag.yaml             # Original DAG definition
-│   ├── *.py                      # Original Python tools
-│   └── *.jinja2                  # Original prompt templates
 ├── src/
+│   └── promptflow/                   # Original PromptFlow implementation (Chat with Wikipedia)
+│       ├── flow.dag.yaml             # Original DAG definition
+│       ├── *.py                      # Original Python tools
+│       └── *.jinja2                  # Original prompt templates
 │   └── process_framework/        # Semantic Kernel Process Framework implementation
 │       ├── steps/                # Process steps
 │       ├── prompts/              # Prompt templates
 │       ├── utils/                # Utility functions (Wikipedia, Observability)
 │       └── wiki_chat_process.py  # Main wiki chat process implementation
-│   └── agent_service/            # Quick demo around Agent Service
+│   └── agent_service/            # Optional quick demo around Agent Service
 │       ├── README.md             # Agent Service Demo Readme
 │       ├── setup.py              # Agent Service Demo Setup
 │       └── agent_service.py      # Agent Service Demo
