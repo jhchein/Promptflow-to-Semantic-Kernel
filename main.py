@@ -32,7 +32,7 @@ async def main():
 
     # Example 3: A question without context
     print("---\n\nExample 3: Question without Context")
-    question3 = "Who will be the next US president?"
+    question3 = "Who will win the next Super Bowl?"
     await wiki_chat.chat(question3)
     print("=== End of Demo ===\n")
 
