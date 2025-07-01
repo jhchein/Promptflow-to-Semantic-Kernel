@@ -44,3 +44,5 @@ for question in questions:
 print_thread_messages(thread.id)
 
 print("=== End of Demo ===\n")
+
+# How to evaluate: https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/develop/agent-evaluate-sdk

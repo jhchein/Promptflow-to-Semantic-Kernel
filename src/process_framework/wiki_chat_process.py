@@ -3,16 +3,16 @@ Chat with Wikipedia Process - Main implementation
 """
 
 import asyncio
-import json
 import logging
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 from rich import print
 from semantic_kernel import Kernel
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.processes import ProcessBuilder
-from semantic_kernel.processes.kernel_process import KernelProcessEvent
+from semantic_kernel.processes.kernel_process import KernelProcess, KernelProcessEvent
 from semantic_kernel.processes.local_runtime.local_kernel_process import start
 
 from .steps.augmented_chat_step import AugmentedChatStep
@@ -26,7 +26,7 @@ from .utils.observability_utils import (
     set_up_tracing,
 )
 
-if not load_dotenv(verbose=True):
+if not load_dotenv(dotenv_path=Path(__file__).parents[2] / ".env", verbose=True):
     print("Failed to load environment variables")
     exit(1)
 
@@ -109,23 +109,33 @@ class WikiChatProcess:
 
         return process_builder.build()
 
-    async def chat(self, question: str) -> str:
-        """Run the chat process with a question"""
-        print(f"Starting chat process with question: [green]{question}[/green]")
-
-        data = {
-            "question": question,
-        }
-
-        # Start the process
+    async def _run_process(self, question: str) -> KernelProcess:
+        """Helper to run the process and get the final state."""
+        data = {"question": question}
         async with await start(
             process=self.process,
             kernel=self.kernel,
             initial_event=KernelProcessEvent(id="Start", data=data),
         ) as process_context:
-            state = await process_context.get_state()
-            pretty_state = json.dumps(state.model_dump(), indent=2, default=str)
-            return f"Process completed. Final state:\n{pretty_state}"
+            return await process_context.get_state()
+
+    async def chat(self, question: str) -> dict[str, str]:
+        """Run the chat process with a question"""
+        print(f"Starting chat process with question: [green]{question}[/green]")
+
+        final_state = await self._run_process(question)
+        final_answer = final_state.steps[-1].state.state.answer  # type: ignore
+        context = final_state.steps[-1].state.state.context  # type: ignore
+
+        return {
+            "response": final_answer,
+            "context": context,
+        }
+
+
+def get_answer(question: str):
+    result = asyncio.run(WikiChatProcess().chat(question))
+    return {"response": result["response"], "context": result["context"]}
 
 
 async def main():
@@ -135,7 +145,7 @@ async def main():
     # Example usage
     question = "What is artificial intelligence?"
     result = await wiki_chat.chat(question)
-    print(f"Final result: {result}")
+    print(f"Final result: {result['response']}")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 # PromptFlow to Semantic Kernel Process Framework Migration
 
-This repository demonstrates how to migrate a PromptFlow application to the Semantic Kernel Process Framework.
+This repository demonstrates how to migrate a PromptFlow application to the Semantic Kernel Process Framework, including evaluation and observability (tracing) capabilities.
 
 ## Project Structure
 
@@ -19,32 +19,52 @@ This repository demonstrates how to migrate a PromptFlow application to the Sema
     │   ├── agent_service.py      # Azure AI Agent demo
     │   ├── README.md
     │   └── setup.py              # Azure AI Agent setup
-    └── process_framework/        # SK Process Framework implementation
-        ├── prompts/              # Prompt templates
-        ├── steps/                # Process Framework Step Defintions
-        ├── utils/                # Utilities (Logging, Wikipedia)
-        └── wiki_chat_process.py  # Chat with Wiki Process Framework implementation.
+    ├── process_framework/        # SK Process Framework implementation
+    │   ├── prompts/              # Prompt templates
+    │   ├── steps/                # Definitions for process steps
+    │   ├── utils/                # Shared utilities (observability, web)
+    │   └── wiki_chat_process.py  # Main process definition
+    └── evaluation/               # Evaluation suite
+        ├── evaluate.py           # Main evaluation script
+        ├── print_eval.py         # Pretty-printing for results
+        └── wiki.jsonl            # Evaluation dataset
 ```
 
-## Running the Demo
+## Getting Started
 
-1.  **Set up environment variables**
+### 1. Set up Environment Variables
 
-    Copy the sample `.env.sample` file to `.env` and update it with your Azure OpenAI credentials.
+Copy the sample `.env.sample` file to `.env` and update it.
 
-    ```bash
-    cp .env.sample .env
-    ```
+```bash
+cp .env.sample .env
+```
 
-2.  **Run the demo**
+### 2. Install Dependencies and Run
 
-    This project uses `uv` to manage dependencies and run the application. It will automatically create a virtual environment and install the required packages.
+This project uses `uv` to manage the virtual environment and dependencies.
 
-    ```bash
-    uv run python main.py
-    ```
+#### Running the Chat Demo
+
+To run the interactive chat demo, which showcases the migrated Semantic Kernel process:
+
+```bash
+uv run python main.py
+```
+
+#### Running the Evaluation
+
+To run the evaluation suite against the `wiki.jsonl` dataset:
+
+```bash
+uv run -m src.evaluation.evaluate
+```
+
+The script will run the evaluators (Relevance, Retrieval, Groundedness) and print a detailed, color-coded report to the console. The full results are saved to `src/evaluation/evaluation_result.json`.
 
 ## Process Flow
+
+The application logic is modeled as a series of connected steps within the Semantic Kernel Process Framework.
 
 ```mermaid
 graph TD
@@ -59,6 +79,8 @@ graph TD
 ## Migration Overview
 
 ### Original PromptFlow Nodes → Process Steps
+
+The core logic from the PromptFlow DAG was migrated to distinct, reusable `ProcessStep` classes.
 
 | PromptFlow Node               | Process Step              | Description                                      |
 | ----------------------------- | ------------------------- | ------------------------------------------------ |
@@ -77,6 +99,8 @@ graph TD
   - [x] Migrated utility functions
   - [x] Built event-driven process flow
 - [x] Add tracing and observability
-- [ ] Create evaluation dataset and metrics
+- [x] Create evaluation dataset and metrics
+  - [x] Implemented Relevance, Retrieval, and Groundedness evaluators
+  - [x] Added pretty-printing for evaluation results
 - [ ] Add red teaming capabilities
-- [ ] Add a more complex SK Process Framework demo (leverage events, more complex flows, and agents with tools) ... e.g. https://github.com/jennifermarsman/MultiagentResearch
+- [ ] Add a more complex SK Process Framework demo (leverage events, more complex flows, structured outputs, and agents with tools) ... e.g. https://github.com/jennifermarsman/MultiagentResearch

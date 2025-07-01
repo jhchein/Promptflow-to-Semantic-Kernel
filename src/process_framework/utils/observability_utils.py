@@ -19,8 +19,9 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.semconv.attributes.service_attributes import SERVICE_NAME
 from opentelemetry.trace import set_tracer_provider
+from pathlib import Path
 
-if not load_dotenv(verbose=True):
+if not load_dotenv(dotenv_path=Path(__file__).parents[3] / ".env", verbose=True):
     print("Failed to load environment variables")
     exit(1)
 
@@ -49,7 +50,9 @@ def set_up_logging():
     # Events from all child loggers will be processed by this handler.
     logger = logging.getLogger()
     logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
+    # Allow setting the log level from an environment variable
+    log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+    logger.setLevel(log_level)
 
 
 def set_up_tracing():
