@@ -3,7 +3,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 
-def shorten_text(text: str, max_length: int = 300) -> str:
+def shorten_text(text: str, max_length: int = 1000) -> str:
     if not text:
         return ""
     if len(text) > max_length:
@@ -36,19 +36,9 @@ def print_row(row, console: Console):
     ret_result = row.get("outputs.retrieval.retrieval_result", "")
     ret_reason = row.get("outputs.retrieval.retrieval_reason", "")
 
-    # New: Groundedness
     groundedness = row.get("outputs.groundedness.groundedness", "")
     groundedness_result = row.get("outputs.groundedness.groundedness_result", "")
     groundedness_reason = row.get("outputs.groundedness.groundedness_reason", "")
-
-    # # New: Response Completeness
-    # resp_compl = row.get("outputs.response_completeness.response_completeness", "")
-    # resp_compl_result = row.get(
-    #     "outputs.response_completeness.response_completeness_result", ""
-    # )
-    # resp_compl_reason = row.get(
-    #     "outputs.response_completeness.response_completeness_reason", ""
-    # )
 
     table = Table(show_header=False, box=None)
     table.add_row("[bold red]QUESTION[/bold red]", shorten_text(question))
@@ -70,13 +60,6 @@ def print_row(row, console: Console):
         f"{'✅ Pass' if groundedness_result == 'pass' else '❌ Fail'} ({groundedness})",
     )
     table.add_row("[dim]Groundedness Reason[/dim]", shorten_text(groundedness_reason))
-    # table.add_row(
-    #     "[bold yellow]RESPONSE COMPLETENESS[/bold yellow]",
-    #     f"{'✅ Pass' if resp_compl_result == 'pass' else '❌ Fail'} ({resp_compl})",
-    # )
-    # table.add_row(
-    #     "[dim]Response Completeness Reason[/dim]", shorten_text(resp_compl_reason)
-    # )
 
     panel = Panel(table, title="Result", expand=False, border_style="magenta")
     console.print(panel)
