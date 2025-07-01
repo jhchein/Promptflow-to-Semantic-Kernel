@@ -11,3 +11,4 @@ wheels/
 .env
 .vscode/
 .github/*.md
+src/evaluation/*.json
