@@ -6,16 +6,15 @@ This repository demonstrates how to migrate a PromptFlow application to the Sema
 
 ```text
 .
-├── README.md                     # This file
 ├── main.py                       # Chat with Wiki Demo application
 ├── .env.sample                   # Environment variable template
 ├── pyproject.toml                # Project dependencies
 └── src/
     ├── promptflow/               # Original PromptFlow implementation (Chat with Wikipedia)
-    │   ├── flow.dag.yaml         # Original DAG definition
-    │   ├── *.py                  # Original Python tools
-    │   └── *.jinja2              # Original prompt templates
-    ├── agent_service/            # Optional: Agent Service demo
+    │   ├── flow.dag.yaml
+    │   ├── *.py
+    │   └── *.jinja2
+    ├── agent_service/            # Optional: Azure AI Agent Service demo
     │   ├── agent_service.py      # Azure AI Agent demo
     │   ├── README.md
     │   └── setup.py              # Azure AI Agent setup
@@ -26,7 +25,6 @@ This repository demonstrates how to migrate a PromptFlow application to the Sema
     │   └── wiki_chat_process.py  # Main process definition
     └── evaluation/               # Evaluation suite
         ├── evaluate.py           # Main evaluation script
-        ├── print_eval.py         # Pretty-printing for results
         └── wiki.jsonl            # Evaluation dataset
 ```
 
