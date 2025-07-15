@@ -19,10 +19,13 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.semconv.attributes.service_attributes import SERVICE_NAME
 from opentelemetry.trace import set_tracer_provider
+
 from pathlib import Path
 
-if not load_dotenv(dotenv_path=Path(__file__).parents[3] / ".env", verbose=True):
-    print("Failed to load environment variables")
+DOTENV_PATH = Path(__file__).parents[4] / ".env"
+
+if not load_dotenv(dotenv_path=DOTENV_PATH, verbose=True):
+    print("observability_utils: Failed to load environment variables")
     exit(1)
 
 connection_string = os.getenv("APPLICATION_INSIGHTS_CONNECTION_STRING")

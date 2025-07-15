@@ -4,7 +4,6 @@ How to evaluate the process locally. More information: https://learn.microsoft.c
 
 import json
 import os
-from pathlib import Path
 
 from azure.ai.evaluation import (
     AzureOpenAIModelConfiguration,
@@ -16,21 +15,20 @@ from azure.ai.evaluation import (
 from dotenv import load_dotenv
 from rich.console import Console
 
-from src.process_framework.wiki_chat_process import get_answer
+from src.wikipedia.process_framework.wiki_chat_process import get_answer
 
 from .print_eval import print_metrics, print_row
 
 console = Console()
 
-EVAL_DATA_PATH = "src/evaluation/wiki.jsonl"
-OUTPUT_PATH = "src/evaluation/evaluation_result.json"
-DOTENV_PATH = Path(__file__).parents[2] / ".env"
+EVAL_DATA_PATH = "src/wikipedia/evaluation/wiki.jsonl"
+OUTPUT_PATH = "src/wikipedia/evaluation/evaluation_result.json"
 
 
 def main() -> None:
     """Run the evaluation pipeline and print results."""
-    if not load_dotenv(dotenv_path=DOTENV_PATH, verbose=True):
-        print("Failed to load environment variables")
+    if not load_dotenv():
+        print("Evaluate: Failed to load environment variables")
         return
 
     endpoint = os.environ.get("ENDPOINT")

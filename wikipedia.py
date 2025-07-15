@@ -7,7 +7,7 @@ import asyncio
 
 from rich import print
 
-from src.process_framework import WikiChatProcess
+from src.wikipedia.process_framework import WikiChatProcess
 
 
 async def main():

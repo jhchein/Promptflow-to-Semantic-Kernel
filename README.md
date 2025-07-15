@@ -10,22 +10,11 @@ This repository demonstrates how to migrate a PromptFlow application to the Sema
 ├── .env.sample                   # Environment variable template
 ├── pyproject.toml                # Project dependencies
 └── src/
-    ├── promptflow/               # Original PromptFlow implementation (Chat with Wikipedia)
-    │   ├── flow.dag.yaml
-    │   ├── *.py
-    │   └── *.jinja2
-    ├── agent_service/            # Optional: Azure AI Agent Service demo
-    │   ├── agent_service.py      # Azure AI Agent demo
-    │   ├── README.md
-    │   └── setup.py              # Azure AI Agent setup
-    ├── process_framework/        # SK Process Framework implementation
-    │   ├── prompts/              # Prompt templates
-    │   ├── steps/                # Definitions for process steps
-    │   ├── utils/                # Shared utilities (observability, web)
-    │   └── wiki_chat_process.py  # Main process definition
-    └── evaluation/               # Evaluation suite
-        ├── evaluate.py           # Main evaluation script
-        └── wiki.jsonl            # Evaluation dataset
+    └── wikipedia/                # Domain: Wikipedia (Chat with Wikipedia)
+        ├── promptflow/           # Original PromptFlow implementation
+        ├── process_framework/    # SK Process Framework implementation
+        ├── evaluation/           # Evaluation suite for Wikipedia
+        └── agent_service/        # Optional: Azure AI Agent Service demo
 ```
 
 ## Getting Started
@@ -47,7 +36,7 @@ This project uses `uv` to manage the virtual environment and dependencies.
 To run the interactive chat demo, which showcases the migrated Semantic Kernel process:
 
 ```bash
-uv run python main.py
+uv run main.py
 ```
 
 #### Running the Evaluation
@@ -55,10 +44,10 @@ uv run python main.py
 To run the evaluation suite against the `wiki.jsonl` dataset:
 
 ```bash
-uv run -m src.evaluation.evaluate
+uv run -m src.wikipedia.evaluation.evaluate
 ```
 
-The script will run the evaluators (Relevance, Retrieval, Groundedness) and print a detailed, color-coded report to the console. The full results are saved to `src/evaluation/evaluation_result.json`.
+The script will run the evaluators (Relevance, Retrieval, Groundedness) and print a detailed, color-coded report to the console. The full results are saved to `src/wikipedia/evaluation/evaluation_result.json`.
 
 ## Process Flow
 

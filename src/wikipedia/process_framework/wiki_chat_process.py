@@ -5,7 +5,6 @@ Chat with Wikipedia Process - Main implementation
 import asyncio
 import logging
 import os
-from pathlib import Path
 
 from dotenv import load_dotenv
 from rich import print
@@ -26,8 +25,12 @@ from .utils.observability_utils import (
     set_up_tracing,
 )
 
-if not load_dotenv(dotenv_path=Path(__file__).parents[2] / ".env", verbose=True):
-    print("Failed to load environment variables")
+from pathlib import Path
+
+DOTENV_PATH = Path(__file__).parents[3] / ".env"
+
+if not load_dotenv(dotenv_path=DOTENV_PATH, verbose=True):
+    print("Wiki Chat Process: Failed to load environment variables")
     exit(1)
 
 # This must be done before any other telemetry calls
