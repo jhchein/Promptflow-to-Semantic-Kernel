@@ -1,3 +1,7 @@
+"""
+How to evaluate the process locally. More information: https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/develop/evaluate-sdk
+"""
+
 import json
 import os
 from pathlib import Path
