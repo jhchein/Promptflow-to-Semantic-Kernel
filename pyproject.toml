@@ -1,7 +1,7 @@
 [project]
 name = "digitalhangar"
 version = "0.1.0"
-description = "Add your description here"
+description = "Examples of using Semantic Kernel Process Framework as an alternative to AzureML Prompt Flow"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
