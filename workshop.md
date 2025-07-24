@@ -217,7 +217,7 @@ Once your application is running, how do you know if it's any good? Evaluation i
 
 - **Core Concepts: What is LLM-as-a-Judge?**
 
-  - Instead of relying on traditional metrics, we use a powerful "judge" LLM (like GPT-4) to assess the quality of our application's responses.
+  - Instead of relying on traditional metrics, we use a powerful "judge" LLM (like o4-mini or GPT-4.1) to assess the quality of our application's responses (we use GPT-4.1-mini for simplicity here).
   - We provide the judge with the user's question, the ground truth answer, the retrieved context, and our application's actual response.
   - The judge then scores the response on various quality metrics, such as relevance and groundedness, and even provides a detailed reason for its score.
 
@@ -226,7 +226,7 @@ Once your application is running, how do you know if it's any good? Evaluation i
   - **1. The Test Data (`wiki.jsonl`)**
 
     - Open [`src/wikipedia/evaluation/wiki.jsonl`](c:\code\customer\Lufthansa\DigitalHangar\src\wikipedia\evaluation\wiki.jsonl).
-    - This file contains our "golden dataset"—a set of questions and the ideal, `ground_truth_answer` for each. This is what we'll measure our system against.
+    - This file contains our "golden dataset" - a set of questions and the `ground_truth_answer` for each. This is what we'll measure our system against.
 
   - **2. The Evaluation Script (`evaluate.py`)**
 
