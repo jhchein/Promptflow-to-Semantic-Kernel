@@ -34,7 +34,6 @@ Welcome to the hands-on workshop for migrating Prompt Flow applications to the S
     - In your Foundry project, go to the Model Catalog, search for your desired model, and select "Deploy".
     - Leave the default deployment name or choose your own.
     - Wait for deployment to complete.
-    - [How to deploy a model](https://learn.microsoft.com/en-us/azure/ai-foundry/quickstarts/get-started-code#deploy-a-model)
   - **Get your Project Connection String:**
     - In your Foundry project, go to the Overview page and copy the connection string.
 
@@ -84,8 +83,6 @@ Welcome to the hands-on workshop for migrating Prompt Flow applications to the S
   - The SK Process Framework lets you define modular, extensible, and stateful AI workflows in Python.
   - **Processes** are composed of **Steps** (Python classes), which can be stateless or stateful.
   - **Steps** communicate via **Events**, enabling flexible orchestration (e.g., sequential pipelines, cycles, branches).
-  - See the [First Process Example](https://learn.microsoft.com/en-us/semantic-kernel/frameworks/process/examples/example-first-process?pivots=programming-language-python) for a simple, annotated walkthrough.
-  - See the [Cycles Example](https://learn.microsoft.com/en-us/semantic-kernel/frameworks/process/examples/example-cycles?pivots=programming-language-python) for advanced event routing and iterative flows.
 
 - **Deconstructing the Migrated Wikipedia Process**
 
@@ -214,10 +211,6 @@ Observability is critical for understanding and debugging complex AI systems. By
   2. **Navigate to your Azure AI Project** in Azure AI Studio.
   3. **Go to the "Traces" section** to find and explore the traces from your application, which will be identified by the service name `semantic_kernel_wiki_chat_process`. You can drill down into each run to see the full execution graph, including timings, inputs, and outputs for each step.
 
-- **References:**
-  - [Trace your application with Azure AI Foundry](https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/develop/trace-application)
-  - [SK Telemetry with Azure AI Foundry Tracing](https://learn.microsoft.com/en-us/semantic-kernel/concepts/enterprise-readiness/observability/telemetry-with-azure-ai-foundry-tracing)
-
 ### 5. Running LLM-based Evaluation
 
 Once your application is running, how do you know if it's any good? Evaluation is key to measuring and improving the quality of your AI system. This project uses the `azure-ai-evaluation` SDK to run an "LLM-as-a-judge" evaluation.
@@ -259,10 +252,6 @@ Once your application is running, how do you know if it's any good? Evaluation i
 
   - In your terminal, run: `uv run -m src.wikipedia.evaluation.evaluate`
   - Observe the output in the console. You will see a summary table of metrics and a detailed breakdown for each question in the test set.
-
-- **References:**
-  - [Evaluate with the Azure AI SDK](https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/develop/evaluate-sdk)
-  - [Evaluation Metrics for RAG](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/evaluation-metrics-rag)
 
 ### 6. (Optional) Alternative: Azure AI Agent Service
 
@@ -310,23 +299,53 @@ So far, we've built a RAG application from the ground up using the SK Process Fr
   - **Azure AI Studio Playground**: Navigate to your AI Project in the [Azure AI Studio](https://ai.azure.com/), go to the "Agents" tab, and select your agent. You can chat with it directly in the web-based playground. This is perfect for rapid testing, demonstrations, and no-code interaction.
   - **REST API**: The agent is exposed via a REST API. The Python SDK used in `agent_service.py` is a convenient wrapper around this API. This means you can integrate your agent into any application, regardless of the programming language, by making standard HTTP requests.
 
-- **References:**
+### 7. Q&A and Next Steps
+
+- **Discussion: When to use SK Process Framework vs. Agent Service?**
+
+  - **SK Process Framework**: Choose for maximum control, custom logic, and complex, explicit workflows. It's ideal when you need to define every step of the process, manage state in a specific way, or integrate with tools and systems that aren't pre-built for the Agent Service.
+  - **Azure AI Agent Service**: Choose for speed and simplicity or multi-agent orchestration. It's perfect for building standard chat assistants and simple RAG applications where a managed ReAct loop and pre-built tools are sufficient. It abstracts away the complexity of orchestration and state management.
+  - You can the Agent Service within the Process Framework.
+
+- **Productionization Considerations**
+
+  - **Error Handling**: The code in this workshop is simplified. In a production environment, you would need to add robust error handling, retries, and fallbacks to every step of your process.
+  - **CI/CD**: Consider setting up a CI/CD pipeline that runs the evaluation script automatically.
+
+    The `azure-ai-evaluation` SDK can be integrated into a GitHub Actions workflow to run on every push to a branch or on a schedule. This ensures that any changes to your prompts, code, or models are automatically tested against your golden dataset.
+
+    For more details, see the official documentation: [How to run an evaluation in GitHub Action](https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/evaluation-github-action?tabs=foundry-project)
+
+  - **Cost and Performance Monitoring**: Use the metrics and traces in Azure AI Studio to monitor the cost and latency of your application. Set up alerts for anomalies.
+
+- **Further Exploration**
+  - **Custom Tools**: Try adding your own custom Python functions as tools.
+  - **Human-in-the-Loop**: How could you modify the copywriting example to require a manual approval step from a human before publishing? Check: [How-To: Human-in-the-Loop](https://learn.microsoft.com/en-us/semantic-kernel/frameworks/process/examples/example-human-in-loop?pivots=programming-language-python).
+  - **More Complex Evaluations**: Explore other metrics in the `azure-ai-evaluation` SDK, such as fluency and coherence.
+
+---
+
+## Appendix: Useful Links
+
+- **Semantic Kernel**
+
+  - [SK Process Framework Documentation](https://learn.microsoft.com/en-us/semantic-kernel/frameworks/process/)
+  - [SK Concepts: Observability with AI Foundry](https://learn.microsoft.com/en-us/semantic-kernel/concepts/enterprise-readiness/observability/telemetry-with-azure-ai-foundry-tracing)
+  - [Example: Create your first Process](https://learn.microsoft.com/en-us/semantic-kernel/frameworks/process/examples/example-first-process?pivots=programming-language-python)
+  - [Example: Using Cycles in a Process](https://learn.microsoft.com/en-us/semantic-kernel/frameworks/process/examples/example-cycles?pivots=programming-language-python)
+
+- **Azure AI Foundry**
+
+  - [Azure AI Foundry Documentation](https://learn.microsoft.com/en-us/azure/ai-foundry/)
+  - [Create an AI Foundry Project](https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/create-projects?tabs=ai-foundry)
+  - [Trace your application with AI Foundry](https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/develop/trace-application)
+  - [Evaluate with the Azure AI SDK](https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/develop/evaluate-sdk)
+  - [Evaluation Metrics for RAG](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/evaluation-metrics-rag)
+
+- **Azure AI Agent Service**
+
   - [Azure AI Agents Quickstart](https://learn.microsoft.com/en-us/azure/ai-foundry/agents/quickstart?pivots=programming-language-python-azure)
   - [Agent Tracing Concepts](https://learn.microsoft.com/en-us/azure/ai-foundry/agents/concepts/tracing)
 
-### 7. Q&A and Next Steps
-
-- **Discuss best practices, productionization, and further resources**
-- **Pointers to Azure documentation and SK Process Framework guides**
-
----
-
-## Appendix
-
-- [Semantic Kernel Process Framework Documentation](https://learn.microsoft.com/en-us/semantic-kernel/frameworks/process/)
-- [Azure AI Foundry Documentation](https://learn.microsoft.com/en-us/azure/ai-foundry/)
-- [Prompt Flow Documentation](https://learn.microsoft.com/en-us/azure/machine-learning/prompt-flow/)
-
----
-
-_This workshop is for educational purposes and is not production-ready. For questions or feedback, please refer to the repository README or contact the maintainers._
+- **Prompt Flow**
+  - [Prompt Flow Documentation](https://learn.microsoft.com/en-us/azure/machine-learning/prompt-flow/)
