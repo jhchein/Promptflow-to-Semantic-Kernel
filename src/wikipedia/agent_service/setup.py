@@ -6,7 +6,7 @@ from azure.identity import DefaultAzureCredential
 from dotenv import load_dotenv
 from rich import print
 
-load_dotenv()
+load_dotenv(override=True)
 
 project_endpoint = os.environ["PROJECT_ENDPOINT"]
 bing_connection_id = os.environ["BING_CONNECTION_ID"]

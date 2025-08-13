@@ -4,9 +4,6 @@ Chat with Wikipedia Process - Main implementation
 
 import asyncio
 import logging
-import os
-
-from dotenv import load_dotenv
 from rich import print
 from semantic_kernel import Kernel
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
@@ -24,14 +21,8 @@ from .utils.observability_utils import (
     set_up_metrics,
     set_up_tracing,
 )
-
-from pathlib import Path
-
-DOTENV_PATH = Path(__file__).parents[3] / ".env"
-
-if not load_dotenv(dotenv_path=DOTENV_PATH, verbose=True):
-    print("Wiki Chat Process: Failed to load environment variables")
-    exit(1)
+from src.wikipedia.config import config, azure_token_provider
+from opentelemetry import trace
 
 # This must be done before any other telemetry calls
 set_up_logging()
@@ -55,10 +46,10 @@ class WikiChatProcess:
         # Add Azure OpenAI service
         kernel.add_service(
             AzureChatCompletion(
-                deployment_name=os.getenv("DEPLOYMENT_NAME"),
-                api_key=os.getenv("API_KEY"),
-                endpoint=os.getenv("ENDPOINT"),
-                service_id=os.getenv("DEPLOYMENT_NAME"),
+                deployment_name=config.AZURE_OPENAI_DEPLOYMENT_NAME,
+                # api_key=os.getenv("API_KEY"),
+                ad_token_provider=azure_token_provider,
+                endpoint=config.AZURE_OPENAI_ENDPOINT,
             )
         )
 
@@ -124,16 +115,19 @@ class WikiChatProcess:
 
     async def chat(self, question: str) -> dict[str, str]:
         """Run the chat process with a question"""
-        print(f"Starting chat process with question: [green]{question}[/green]")
 
-        final_state = await self._run_process(question)
-        final_answer = final_state.steps[-1].state.state.answer  # type: ignore
-        context = final_state.steps[-1].state.state.context  # type: ignore
+        tracer = trace.get_tracer(__name__)
+        with tracer.start_as_current_span("chat_process"):
+            print(f"Starting chat process with question: [green]{question}[/green]")
 
-        return {
-            "response": final_answer,
-            "context": context,
-        }
+            final_state = await self._run_process(question)
+            final_answer = final_state.steps[-1].state.state.answer  # type: ignore
+            context = final_state.steps[-1].state.state.context  # type: ignore
+
+            return {
+                "response": final_answer,
+                "context": context,
+            }
 
 
 def get_answer(question: str):

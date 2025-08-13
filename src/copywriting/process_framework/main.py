@@ -2,7 +2,6 @@ import asyncio
 import os
 from typing import ClassVar
 
-from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from rich import print
 from semantic_kernel import Kernel
@@ -23,8 +22,6 @@ from semantic_kernel.processes.kernel_process import (
     KernelProcessStepState,
 )
 from semantic_kernel.processes.local_runtime.local_kernel_process import start
-
-load_dotenv()
 
 
 # A process step to gather information about a product

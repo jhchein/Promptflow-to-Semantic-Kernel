@@ -1,12 +1,11 @@
 import logging
-import os
 
 from azure.monitor.opentelemetry.exporter import (
     AzureMonitorLogExporter,
     AzureMonitorMetricExporter,
     AzureMonitorTraceExporter,
 )
-from dotenv import load_dotenv
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry._logs import set_logger_provider
 from opentelemetry.metrics import set_meter_provider
 from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
@@ -19,23 +18,23 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.semconv.attributes.service_attributes import SERVICE_NAME
 from opentelemetry.trace import set_tracer_provider
-
-from pathlib import Path
-
-DOTENV_PATH = Path(__file__).parents[4] / ".env"
-
-if not load_dotenv(dotenv_path=DOTENV_PATH, verbose=True):
-    print("observability_utils: Failed to load environment variables")
-    exit(1)
-
-connection_string = os.getenv("APPLICATION_INSIGHTS_CONNECTION_STRING")
+from src.wikipedia.config import config
 
 # Create a resource to represent the service/sample
 resource = Resource.create({SERVICE_NAME: "semantic_kernel_wiki_chat_process"})
 
+logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logging.getLogger().setLevel(logging.INFO)
+logging.getLogger("azure").setLevel("WARNING")
+
+# Instrument requests package
+RequestsInstrumentor().instrument()
+
 
 def set_up_logging():
-    exporter = AzureMonitorLogExporter(connection_string=connection_string)
+    exporter = AzureMonitorLogExporter(
+        connection_string=config.APPLICATIONINSIGHTS_CONNECTIONSTRING
+    )
 
     # Create and set a global logger provider for the application.
     logger_provider = LoggerProvider(resource=resource)
@@ -49,17 +48,17 @@ def set_up_logging():
     handler = LoggingHandler()
     # Add filters to the handler to only process records from semantic_kernel.
     handler.addFilter(logging.Filter("semantic_kernel"))
+    handler.setLevel(logging.INFO)
     # Attach the handler to the root logger. `getLogger()` with no arguments returns the root logger.
     # Events from all child loggers will be processed by this handler.
     logger = logging.getLogger()
     logger.addHandler(handler)
-    # Allow setting the log level from an environment variable
-    log_level = os.getenv("LOG_LEVEL", "INFO").upper()
-    logger.setLevel(log_level)
 
 
 def set_up_tracing():
-    exporter = AzureMonitorTraceExporter(connection_string=connection_string)
+    exporter = AzureMonitorTraceExporter(
+        connection_string=config.APPLICATIONINSIGHTS_CONNECTIONSTRING
+    )
 
     # Initialize a trace provider for the application. This is a factory for creating tracers.
     tracer_provider = TracerProvider(resource=resource)
@@ -71,7 +70,9 @@ def set_up_tracing():
 
 
 def set_up_metrics():
-    exporter = AzureMonitorMetricExporter(connection_string=connection_string)
+    exporter = AzureMonitorMetricExporter(
+        connection_string=config.APPLICATIONINSIGHTS_CONNECTIONSTRING
+    )
 
     # Initialize a metric provider for the application. This is a factory for creating meters.
     meter_provider = MeterProvider(
