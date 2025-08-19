@@ -72,6 +72,12 @@ class WikiChatProcess:
             function_name="extract_query",
             parameter_name="data",
         )
+        
+        process_builder.on_input_event("ApprovalResult").send_event_to(
+            target=extract_query_step,
+            function_name="extract_query",
+            parameter_name="data",
+        )
 
         # Extract query -> Get URLs
         extract_query_step.on_function_result("extract_query").send_event_to(
@@ -104,30 +110,32 @@ class WikiChatProcess:
         return process_builder.build()
 
     async def _run_process(self, question: str) -> KernelProcess:
-        """Helper to run the process and get the final state."""
-        data = {"question": question}
-        async with await start(
-            process=self.process,
-            kernel=self.kernel,
-            initial_event=KernelProcessEvent(id="Start", data=data),
-        ) as process_context:
-            return await process_context.get_state()
+        tracer = trace.get_tracer(__name__)
+        # Ensure all traced have a root
+        with tracer.start_as_current_span("chat_process") as span:
+            span.set_attribute("question", question)
+            """Helper to run the process and get the final state."""
+            data = {"question": question}
+            async with await start(
+                process=self.process,
+                kernel=self.kernel,
+                initial_event=KernelProcessEvent(id="Start", data=data),
+            ) as process_context:
+                return await process_context.get_state()
 
     async def chat(self, question: str) -> dict[str, str]:
         """Run the chat process with a question"""
 
-        tracer = trace.get_tracer(__name__)
-        with tracer.start_as_current_span("chat_process"):
-            print(f"Starting chat process with question: [green]{question}[/green]")
+        print(f"Starting chat process with question: [green]{question}[/green]")
 
-            final_state = await self._run_process(question)
-            final_answer = final_state.steps[-1].state.state.answer  # type: ignore
-            context = final_state.steps[-1].state.state.context  # type: ignore
+        final_state = await self._run_process(question)
+        final_answer = final_state.steps[-1].state.state.answer  # type: ignore
+        context = final_state.steps[-1].state.state.context  # type: ignore
 
-            return {
-                "response": final_answer,
-                "context": context,
-            }
+        return {
+            "response": final_answer,
+            "context": context,
+        }
 
 
 def get_answer(question: str):

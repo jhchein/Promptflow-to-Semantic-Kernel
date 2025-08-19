@@ -22,6 +22,9 @@ from semantic_kernel.processes.kernel_process import (
     KernelProcessStepState,
 )
 from semantic_kernel.processes.local_runtime.local_kernel_process import start
+from dotenv import load_dotenv
+
+load_dotenv(override=True, verbose=True)
 
 
 # A process step to gather information about a product
@@ -225,15 +228,14 @@ async def main():
     kernel = Kernel()
     kernel.add_service(
         AzureChatCompletion(
-            deployment_name=os.getenv("DEPLOYMENT_NAME"),
-            api_key=os.getenv("API_KEY"),
-            endpoint=os.getenv("ENDPOINT"),
-            service_id=os.getenv("DEPLOYMENT_NAME"),
+            deployment_name=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
+            endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+            service_id=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
         )
     )
 
     # Create the process builder
-    process_builder = ProcessBuilder(name="DocumentationGeneration")
+    process_builder = ProcessBuilder(name="DocumentationGeneration")  # type: ignore
 
     # Add the steps
     info_gathering_step = process_builder.add_step(GatherProductInfoStep)
