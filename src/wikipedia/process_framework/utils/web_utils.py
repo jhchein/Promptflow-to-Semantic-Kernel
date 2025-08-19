@@ -10,6 +10,9 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 
 from rich import print
+from opentelemetry import trace
+
+tracer = trace.get_tracer(__name__)
 
 
 def decode_str(string):
@@ -30,44 +33,56 @@ def get_page_sentence(page, count: int = 10):
 
 
 def fetch_text_content_from_url(url: str, count: int = 10):
-    """Fetch text content from a URL"""
-    session = requests.Session()
+    with tracer.start_as_current_span("fetch_text_content_from_url"):
+        """Fetch text content from a URL"""
+        session = requests.Session()
 
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.35"
-    }
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.35"
+        }
 
-    delay = random.uniform(0, 0.5)
-    time.sleep(delay)
+        delay = random.uniform(0, 0.5)
+        time.sleep(delay)
 
-    response = session.get(url, headers=headers)
-    if response.status_code == 200:
-        soup = bs4.BeautifulSoup(response.text, "html.parser")
-        page_content = [
-            p_ul.get_text().strip() for p_ul in soup.find_all("p") + soup.find_all("ul")
-        ]
+        response = session.get(url, headers=headers)
+        if response.status_code == 200:
+            soup = bs4.BeautifulSoup(response.text, "html.parser")
+            page_content = [
+                p_ul.get_text().strip()
+                for p_ul in soup.find_all("p") + soup.find_all("ul")
+            ]
 
-        page = ""
-        for content in page_content:
-            if len(content.split(" ")) > 2:
-                page += content + "\n"
+            page = ""
+            for content in page_content:
+                if len(content.split(" ")) > 2:
+                    page += content + "\n"
 
-        text = get_page_sentence(page, count=count)
-        return (url, text)
-    else:
-        print(f"Get url failed with status code {response.status_code} for URL: {url}")
-        return (url, "No available content")
+            text = get_page_sentence(page, count=count)
+            return (url, text)
+        else:
+            print(
+                f"Get url failed with status code {response.status_code} for URL: {url}"
+            )
+            return (url, "No available content")
 
 
 def search_results_from_urls(url_list: list, count: int = 10):
-    """Get search results from multiple URLs concurrently"""
+    """Get search results from multiple URLs concurrently with OTEL tracing"""
     results = []
     partial_func = partial(fetch_text_content_from_url, count=count)
+    import contextvars
 
-    with ThreadPoolExecutor(max_workers=5) as executor:
-        futures = executor.map(partial_func, url_list)
-        for result in futures:
-            results.append(result)
+    with tracer.start_as_current_span("search_results_from_urls"):
+
+        def wrapped(url):
+            # Copy the context and run the partial function
+            ctx = contextvars.copy_context()
+            return ctx.run(partial_func, url)
+
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            futures = executor.map(wrapped, url_list)
+            for result in futures:
+                results.append(result)
 
     return results

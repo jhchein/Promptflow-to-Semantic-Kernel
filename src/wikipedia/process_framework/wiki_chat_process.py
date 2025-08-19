@@ -4,9 +4,6 @@ Chat with Wikipedia Process - Main implementation
 
 import asyncio
 import logging
-import os
-
-from dotenv import load_dotenv
 from rich import print
 from semantic_kernel import Kernel
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
@@ -24,14 +21,8 @@ from .utils.observability_utils import (
     set_up_metrics,
     set_up_tracing,
 )
-
-from pathlib import Path
-
-DOTENV_PATH = Path(__file__).parents[3] / ".env"
-
-if not load_dotenv(dotenv_path=DOTENV_PATH, verbose=True):
-    print("Wiki Chat Process: Failed to load environment variables")
-    exit(1)
+from src.wikipedia.config import config, azure_token_provider
+from opentelemetry import trace
 
 # This must be done before any other telemetry calls
 set_up_logging()
@@ -55,10 +46,10 @@ class WikiChatProcess:
         # Add Azure OpenAI service
         kernel.add_service(
             AzureChatCompletion(
-                deployment_name=os.getenv("DEPLOYMENT_NAME"),
-                api_key=os.getenv("API_KEY"),
-                endpoint=os.getenv("ENDPOINT"),
-                service_id=os.getenv("DEPLOYMENT_NAME"),
+                deployment_name=config.AZURE_OPENAI_DEPLOYMENT_NAME,
+                # api_key=os.getenv("API_KEY"),
+                ad_token_provider=azure_token_provider,
+                endpoint=config.AZURE_OPENAI_ENDPOINT,
             )
         )
 
@@ -77,6 +68,12 @@ class WikiChatProcess:
 
         # Define the flow - Start with question and chat_history
         process_builder.on_input_event("Start").send_event_to(
+            target=extract_query_step,
+            function_name="extract_query",
+            parameter_name="data",
+        )
+        
+        process_builder.on_input_event("ApprovalResult").send_event_to(
             target=extract_query_step,
             function_name="extract_query",
             parameter_name="data",
@@ -113,17 +110,22 @@ class WikiChatProcess:
         return process_builder.build()
 
     async def _run_process(self, question: str) -> KernelProcess:
-        """Helper to run the process and get the final state."""
-        data = {"question": question}
-        async with await start(
-            process=self.process,
-            kernel=self.kernel,
-            initial_event=KernelProcessEvent(id="Start", data=data),
-        ) as process_context:
-            return await process_context.get_state()
+        tracer = trace.get_tracer(__name__)
+        # Ensure all traced have a root
+        with tracer.start_as_current_span("chat_process") as span:
+            span.set_attribute("question", question)
+            """Helper to run the process and get the final state."""
+            data = {"question": question}
+            async with await start(
+                process=self.process,
+                kernel=self.kernel,
+                initial_event=KernelProcessEvent(id="Start", data=data),
+            ) as process_context:
+                return await process_context.get_state()
 
     async def chat(self, question: str) -> dict[str, str]:
         """Run the chat process with a question"""
+
         print(f"Starting chat process with question: [green]{question}[/green]")
 
         final_state = await self._run_process(question)

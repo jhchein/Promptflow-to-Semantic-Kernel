@@ -6,7 +6,7 @@ from azure.identity import DefaultAzureCredential
 from dotenv import load_dotenv
 from rich import print
 
-load_dotenv()
+load_dotenv(override=True)
 
 project = AIProjectClient(
     credential=DefaultAzureCredential(),
